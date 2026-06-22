@@ -157,7 +157,7 @@ function compile(programText, target = 'overflow', format = 'key') {
 	};
 	
 	try {
-		libcompiler.process(args, program, 0x8DA4);
+		libcompiler.processProgram(args, program, 0x8DA4);
 	} catch (e) {
 		console.log = oldLog;
 		throw e;
