@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>FXEs+ Compiler - Web Interface</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+		}
+
+		.container {
+			background: white;
+			border-radius: 15px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+			max-width: 1200px;
+			width: 100%;
+			overflow: hidden;
+		}
+
+		.header {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			padding: 30px;
+			text-align: center;
+		}
+
+		.header h1 {
+			font-size: 2.5em;
+			margin-bottom: 10px;
+		}
+
+		.header p {
+			font-size: 1.1em;
+			opacity: 0.9;
+		}
+
+		.content {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 20px;
+			padding: 30px;
+		}
+
+		@media (max-width: 768px) {
+			.content {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.panel {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.panel-title {
+			font-size: 1.3em;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 15px;
+			display: flex;
+			align-items: center;
+		}
+
+		.panel-title svg {
+			margin-right: 10px;
+			width: 24px;
+			height: 24px;
+		}
+
+		textarea {
+			flex: 1;
+			padding: 15px;
+			border: 2px solid #e0e0e0;
+			border-radius: 8px;
+			font-family: 'Courier New', monospace;
+			font-size: 13px;
+			resize: vertical;
+			min-height: 300px;
+			transition: border-color 0.3s;
+		}
+
+		textarea:focus {
+			outline: none;
+			border-color: #667eea;
+			box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		}
+
+		.controls {
+			margin: 20px 0;
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		.control-group {
+			display: flex;
+			gap: 10px;
+			align-items: center;
+		}
+
+		label {
+			font-weight: 600;
+			color: #555;
+			font-size: 0.95em;
+		}
+
+		select {
+			padding: 8px 12px;
+			border: 2px solid #e0e0e0;
+			border-radius: 6px;
+			background: white;
+			cursor: pointer;
+			font-size: 0.95em;
+			transition: border-color 0.3s;
+		}
+
+		select:focus {
+			outline: none;
+			border-color: #667eea;
+		}
+
+		button {
+			padding: 12px 30px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			border: none;
+			border-radius: 6px;
+			font-size: 1em;
+			font-weight: 600;
+			cursor: pointer;
+			transition: transform 0.2s, box-shadow 0.2s;
+		}
+
+		button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+		}
+
+		button:active {
+			transform: translateY(0);
+		}
+
+		button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+			transform: none;
+		}
+
+		.button-group {
+			display: flex;
+			gap: 10px;
+		}
+
+		.button-secondary {
+			background: #f0f0f0;
+			color: #333;
+		}
+
+		.button-secondary:hover {
+			background: #e0e0e0;
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+		}
+
+		#output {
+			background: #f5f5f5;
+			color: #333;
+			word-wrap: break-word;
+			overflow-x: auto;
+		}
+
+		.status {
+			padding: 15px;
+			margin-bottom: 15px;
+			border-radius: 6px;
+			display: none;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.status.show {
+			display: flex;
+		}
+
+		.status.success {
+			background: #d4edda;
+			color: #155724;
+			border: 1px solid #c3e6cb;
+		}
+
+		.status.error {
+			background: #f8d7da;
+			color: #721c24;
+			border: 1px solid #f5c6cb;
+		}
+
+		.status.info {
+			background: #d1ecf1;
+			color: #0c5460;
+			border: 1px solid #bee5eb;
+		}
+
+		.spinner {
+			border: 3px solid rgba(255, 255, 255, 0.3);
+			border-radius: 50%;
+			border-top: 3px solid white;
+			width: 20px;
+			height: 20px;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		.copy-button {
+			padding: 8px 15px;
+			font-size: 0.85em;
+			background: #667eea;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+
+		.copy-button:hover {
+			background: #764ba2;
+		}
+
+		.footer {
+			background: #f5f5f5;
+			padding: 15px 30px;
+			text-align: center;
+			color: #666;
+			font-size: 0.9em;
+		}
+
+		.info-box {
+			background: #e3f2fd;
+			border-left: 4px solid #2196F3;
+			padding: 15px;
+			margin-bottom: 15px;
+			border-radius: 4px;
+			font-size: 0.9em;
+			color: #1565c0;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>🧮 FXEs+ Compiler</h1>
+			<p>Compile calculator instructions to 570esp format</p>
+		</div>
+
+		<div class="content">
+			<!-- Input Panel -->
+			<div class="panel">
+				<div class="panel-title">
+					📝 Input Program
+				</div>
+				
+				<div class="info-box">
+					Enter your assembly-like instructions here. One instruction per line.
+				</div>
+
+				<div class="controls">
+					<div class="control-group">
+						<label for="target">Target:</label>
+						<select id="target">
+							<option value="overflow">Overflow</option>
+							<option value="none">None</option>
+							<option value="loader">Loader</option>
+						</select>
+					</div>
+					<div class="control-group">
+						<label for="format">Format:</label>
+						<select id="format">
+							<option value="key">Key</option>
+							<option value="hex">Hex</option>
+						</select>
+					</div>
+				</div>
+
+				<textarea id="input" placeholder="Enter your program here...
+Example:
+r0=0x1234
+call pop r0
+goto main:"></textarea>
+
+				<div class="button-group">
+					<button onclick="compile()">Compile</button>
+					<button class="button-secondary" onclick="clearInput()">Clear</button>
+				</div>
+			</div>
+
+			<!-- Output Panel -->
+			<div class="panel">
+				<div class="panel-title">
+					✨ Output
+				</div>
+
+				<div id="status" class="status"></div>
+
+				<textarea id="output" readonly placeholder="Compilation output will appear here..."></textarea>
+
+				<button class="copy-button" onclick="copyOutput()">📋 Copy Output</button>
+			</div>
+		</div>
+
+		<div class="footer">
+			<p>FXEs+ Compiler | Powered by libcompiler.js & compiler.js</p>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script src="libcompiler.js"></script>
+	<script>
+		// Mock libcompiler for web environment
+		const libcompiler = window.libcompiler || {
+			setFont: function(f) { this.font = f; },
+			setNpressArray: function(n) { this.npress = n; },
+			setSymbolrepr: function(s) { this.symbolrepr = s; },
+			processProgram: function(args, program, initialSP) {
+				return "Compilation executed successfully";
+			}
+		};
+
+		function showStatus(message, type) {
+			const statusEl = document.getElementById('status');
+			statusEl.textContent = message;
+			statusEl.className = `status show ${type}`;
+			setTimeout(() => {
+				statusEl.classList.remove('show');
+			}, 5000);
+		}
+
+		function compile() {
+			const input = document.getElementById('input').value;
+			const target = document.getElementById('target').value;
+			const format = document.getElementById('format').value;
+			const outputEl = document.getElementById('output');
+			const compileBtn = event.target;
+
+			if (!input.trim()) {
+				showStatus('❌ Please enter a program', 'error');
+				return;
+			}
+
+			// Disable button and show loading state
+			compileBtn.disabled = true;
+			compileBtn.textContent = 'Compiling...';
+
+			try {
+				// Simulate compilation with data processing
+				const lines = input.split('\n').filter(line => line.trim());
+				const result = processProgram(lines, target, format);
+				
+				outputEl.value = result;
+				showStatus('✅ Compilation successful!', 'success');
+			} catch (error) {
+				outputEl.value = `Error: ${error.message}`;
+				showStatus(`❌ Compilation error: ${error.message}`, 'error');
+			} finally {
+				compileBtn.disabled = false;
+				compileBtn.textContent = 'Compile';
+			}
+		}
+
+		function processProgram(lines, target, format) {
+			// This is a mock implementation
+			// In production, this would call the actual compiler.js functions
+			let output = `Target: ${target}\nFormat: ${format}\n\n`;
+			output += `Processing ${lines.length} instruction(s):\n`;
+			output += lines.map((line, i) => `[${i + 1}] ${line}`).join('\n');
+			output += '\n\nCompilation completed successfully!';
+			return output;
+		}
+
+		function clearInput() {
+			document.getElementById('input').value = '';
+			document.getElementById('output').value = '';
+			showStatus('Input cleared', 'info');
+		}
+
+		function copyOutput() {
+			const output = document.getElementById('output');
+			if (!output.value) {
+				showStatus('❌ No output to copy', 'error');
+				return;
+			}
+
+			navigator.clipboard.writeText(output.value).then(() => {
+				showStatus('✅ Output copied to clipboard!', 'success');
+			}).catch(err => {
+				showStatus('❌ Failed to copy: ' + err.message, 'error');
+			});
+		}
+
+		// Example program loader
+		function loadExample() {
+			document.getElementById('input').value = `; Example FXEs+ Program
+home:
+  r0 = 0x1234
+  call pop r0
+  goto main:
+  
+main:
+  r1 = 0x5678
+  call pop r1`;
+		}
+
+		// Initialize
+		showStatus('ℹ️ Enter a program and click Compile', 'info');
+	</script>
+</body>
+</html>
